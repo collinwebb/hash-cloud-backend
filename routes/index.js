@@ -59,7 +59,7 @@ router.post("/search", function(req, res, next){
     words.forEach(function(word){
       regexp = new RegExp("(\\b[\\#\\@]?" + word + "\\b)+", "g");
       matches = tweetText.match(regexp);
-      stats.tags[word] = matches.length;
+      stats.tags[word] = matches ? matches.length : 0;
     });
 
     res.json(stats);
