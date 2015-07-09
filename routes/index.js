@@ -16,12 +16,27 @@ function twitterClient(params){
   });
 }
 
+router.post("/follow", function(req, res, next){
+  var client = twitterClient(req.body);
+  client.post('friendships/create', {screen_name: req.body.screen_name}, function(error, user, response){
+    if (error) {
+      console.error(error);
+      res.status(500);
+      return;
+    }
+    res.json(user);
+  });
+});
+
 router.post("/tweet", function(req, res, next){
   var client = twitterClient(req.body);
   client.post('statuses/update', {status: req.body.tweet}, function(error, tweets, response){
-    if (!error) {
-      res.json(tweets);
+    if (error) {
+      console.error(error);
+      res.status(500);
+      return;
     }
+    res.json(tweets);
   });
 });
 
@@ -30,22 +45,24 @@ router.post("/search", function(req, res, next){
   var words = req.body.words.split(" ");
 
   client.get('search/tweets', {q: words.join(" OR "), count: 100}, function(error, tweets, response){
-    if (!error) {
-      var stats = {tags: {}, people: {}}, tweetText = "", regexp, matches;
-
-      tweets.statuses.forEach(function(tweet){
-        tweetText += + " " + tweet.text.toLowerCase();
-        stats.people[tweet.user.name] = tweet.user;
-      });
-      words.forEach(function(word){
-        regexp = new RegExp("(\\b[\\#\\@]?" + word + "\\b)+", "g");
-        matches = tweetText.match(regexp);
-        stats.tags[word] = matches.length;
-      });
-
-      // console.log(stats);
-      res.json(stats);
+    if (error) {
+      console.error(error);
+      res.status(500);
+      return;
     }
+    var stats = {tags: {}, people: {}}, tweetText = "", regexp, matches;
+
+    tweets.statuses.forEach(function(tweet){
+      tweetText += + " " + tweet.text.toLowerCase();
+      stats.people[tweet.user.screen_name] = tweet.user;
+    });
+    words.forEach(function(word){
+      regexp = new RegExp("(\\b[\\#\\@]?" + word + "\\b)+", "g");
+      matches = tweetText.match(regexp);
+      stats.tags[word] = matches.length;
+    });
+
+    res.json(stats);
   });
 });
 
