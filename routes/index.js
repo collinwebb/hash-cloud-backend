@@ -53,11 +53,11 @@ router.post("/search", function(req, res, next){
     var stats = {tags: {}, people: {}}, tweetText = "", regexp, matches;
 
     tweets.statuses.forEach(function(tweet){
-      tweetText += + " " + tweet.text.toLowerCase();
+      tweetText += " " + tweet.text.toLowerCase();
       stats.people[tweet.user.screen_name] = tweet.user;
     });
     words.forEach(function(word){
-      regexp = new RegExp("(\\b[\\#\\@]?" + word + "\\b)+", "g");
+      regexp = new RegExp("(" + word + "\\b)+", "g");
       matches = tweetText.match(regexp);
       stats.tags[word] = matches ? matches.length : 0;
     });
